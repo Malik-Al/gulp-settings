@@ -1,4 +1,10 @@
 @import "header";
+@font-face {
+  font-family: Redacted;
+  src: url("../font/Corinthia-Regular.ttf");
+  src: url("../font/Corinthia-Bold.ttf");
+}
+
 body{
   font-size: 15px;
   display: flex;

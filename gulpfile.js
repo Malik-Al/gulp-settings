@@ -12,32 +12,38 @@ const uglify = require('gulp-uglify-es').default;
 const imagemin = require('gulp-imagemin');
 const webp = require('gulp-webp');
 const webphtml = require('gulp-webp-html');
+const fonter = require('gulp-fonter');
+const ttf2woff2 = require('gulp-ttf2woff2');
 
 
 const project_folder = 'dist';
 const source_folder = 'src';
+
 
 const path = {
     build: {
         html: `${project_folder}/`,
         css: `${project_folder}/css/`,
         js: `${project_folder}/js/`,
-        img: `${project_folder}/img/`
+        img: `${project_folder}/img/`,
+        font: `${project_folder}/font`
     },
     src: {
         html: [`${source_folder}/*.html`, '!'+`${source_folder}/_*.html`],
         css: `${source_folder}/scss/style.scss`,
         js: `${source_folder}/js/script.js`,
-        img: `${source_folder}/img/**/*.{jpg,png,svg,gif,ico,webp}`
+        img: `${source_folder}/img/**/*.{jpg,png,svg,gif,ico,webp}`,
+        font: `${source_folder}/font/**/*.{eot,ttf,otf,otc,ttc,woff,woff,woff2,svg}`
     },
     watch: {
         html: `${source_folder}/**/*.html`,
         css: `${source_folder}/scss/**/*.scss`,
         js: `${source_folder}/js/**/*.js`,
-        img: `${source_folder}/img/**/*.{jpg,png,svg,gif,ico,webp}`
+        img: `${source_folder}/img/**/*.{jpg,png,svg,gif,ico,webp}`,
+        font: `${source_folder}/font/**/*.{eot,ttf,otf,otc,ttc,woff,woff,woff2,svg}`
+
     },
     clean: `./${project_folder}/`
-
 }
 
 function browserSync(){
@@ -106,19 +112,31 @@ function images(){
         .pipe(browsersync.stream())
 }
 
+function font(){
+    return src(path.src.font)
+        .pipe(dest(path.build.font))
+        .pipe(fonter({
+            formats: ['ttf','woff', 'eot', 'svg']
+        }))
+        .pipe(dest(path.build.font))
+        .pipe(ttf2woff2())
+        .pipe(dest(path.build.font))
+        .pipe(browsersync.stream())
+}
+
 function watchFiles(){
     gulp.watch([path.watch.html], html);
     gulp.watch([path.watch.css], css);
     gulp.watch([path.watch.js], js);
     gulp.watch([path.watch.img], images);
-
+    gulp.watch([path.watch.font], font);
 }
 
 function clean(){
     return del(path.clean)
 }
 
-const build = gulp.series(clean, gulp.parallel(js, css, html, images))
+const build = gulp.series(clean, gulp.parallel(js, css, html, images, font))
 const watch = gulp.parallel(build, watchFiles, browserSync);
 
 
